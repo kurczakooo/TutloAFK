@@ -5,10 +5,7 @@ import time
 from checking_and_clicking_bot import CheckingAndClickingBot
 
 #remember to disable antivirus before pyinstaller
-#pyinstaller --noconsole main.py
-
-#TO DO
-#make a timer to run the program for a certain period of time
+#pyinstaller --noconsole --onefile main.py
 
 class SetCoordinatesFrame(customtkinter.CTkFrame):
     def __init__(self, master, title, id):
