@@ -70,6 +70,7 @@ class StartStopFrame(customtkinter.CTkFrame):
         super().__init__(master)
         self.elapsed_time = 0
         self.running = False
+        self.timer = 99999
 
         self.grid_columnconfigure((0, 1), weight=1)
 
@@ -105,6 +106,10 @@ class StartStopFrame(customtkinter.CTkFrame):
         new_formatted_time = time.strftime("%H:%M:%S", time.gmtime(new_time))
         self.elapsed_time = new_time
         self.after(0, self.title_label.configure(text=f'Elapsed worktime {new_formatted_time}'), new_formatted_time)
+        if(self.elapsed_time >= self.timer):
+            self.master.bot.logs.append("Timer reached.")
+            self.confirm_stop()
+
 
 
 
@@ -155,31 +160,64 @@ class LogsFrame(customtkinter.CTkScrollableFrame):
 
 
 
+class TimerFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.grid_columnconfigure(0, weight=1)
+
+        self.label = customtkinter.CTkLabel(self, text="Timer")
+        self.label.grid(row=0, column=0, sticky='ew', columnspan=1, padx=5, pady=(10, 0))
+
+        self.entry_time = customtkinter.CTkEntry(self, placeholder_text="Set timer (minutes) (optional) ")
+        self.entry_time.grid(row=1, column=0, sticky='ew', columnspan=1, padx=5)
+        
+        self.stop_button = customtkinter.CTkButton(self, text="Save", command=self.set_timer)
+        self.stop_button.grid(row=2, column=0, sticky='ew', columnspan=1, padx=5, pady=(7,5))
+        
+    def set_timer(self):
+        
+        time = self.entry_time.get()
+        
+        if not time: 
+            self.master.bot.logs.append("Timer set : no timer")
+        elif not time.isdigit():
+            self.master.bot.logs.append("Timer value should be an integer")
+        else:
+            self.master.bot.logs.append(f"Timer set: {time} min")
+            self.time = int(time) * 60
+            self.master.start_stop.timer = self.time
+
+
+
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("Tutlo afk")
-        self.geometry("640x360")
+        self.geometry("640x420")
         self.resizable(width=False, height=True)
         
-        self.grid_columnconfigure(1, weight=1)  # Column for LogsFrame
-        self.grid_rowconfigure((0, 1, 2), weight=1)  # Rows for LogsFrame
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=2)
+        self.grid_rowconfigure((0, 1, 2), weight=1)
 
         self.bot = CheckingAndClickingBot()
 
         self.frame1 = SetCoordinatesFrame(self, 'Answer call button coordinates', id=1)
-        self.frame1.grid(row=0, column=0, sticky='w', columnspan=1, pady=(10, 5), padx=10)
+        self.frame1.grid(row=0, column=0, sticky='nsew', columnspan=1, pady=(10, 5), padx=10)
         self.frame2 = SetCoordinatesFrame(self, 'Close new tab button coordinates', id=2)
-        self.frame2.grid(row=1, column=0, sticky='w', columnspan=1, pady=(10, 5), padx=10)
-        
+        self.frame2.grid(row=1, column=0, sticky='nsew', columnspan=1, pady=(10, 5), padx=10)
         self.start_stop = StartStopFrame(self)
-        self.start_stop.grid(row=2, column=0, sticky='w', columnspan=1, pady=(30, 10), padx=10)
+        self.start_stop.grid(row=2, column=0, sticky='nsew', columnspan=1, pady=(50, 10), padx=10)
         
+        
+        self.timer = TimerFrame(self)
+        self.timer.grid(row=0, column=1, sticky='nsew', columnspan=1, padx=(5, 10), pady=(10, 5))
         
         self.logs_frame=LogsFrame(self, values=self.bot.logs, bot=self.bot)
-        self.logs_frame.grid(row=0, column=1, sticky='nsew', rowspan=3, pady=10, padx=10)
+        self.logs_frame.grid(row=1, column=1, sticky='nsew', rowspan=2, columnspan=1, pady=10, padx=(5, 10))
         
         self.logs_frame.start_log_monitoring()
 
