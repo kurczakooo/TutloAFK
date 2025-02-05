@@ -5,7 +5,7 @@ import pyautogui
 
 class CheckingAndClickingBot():
     def __init__(self):
-        self.green_color = (61, 140, 64)
+        self.green_color = [(61, 140, 64),(76, 176, 80)]
         self.working = False
         self.logs = []
         
@@ -13,9 +13,9 @@ class CheckingAndClickingBot():
         screenshot = ImageGrab.grab(bbox=(self.answer_call_cords[0], self.answer_call_cords[1], self.answer_call_cords[0] + 2, self.answer_call_cords[1] + 100))
         checked_color1 = screenshot.getpixel((0, 0))
         checked_color2 = screenshot.getpixel((0, 30))
-        if checked_color1 == self.green_color:
+        if checked_color1 in self.green_color:
             return 1
-        elif checked_color2 == self.green_color:
+        elif checked_color2 in self.green_color:
             return 2
         return 0
     
